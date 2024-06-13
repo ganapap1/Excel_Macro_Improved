@@ -1,0 +1,39 @@
+Private Sub Worksheet_Change(ByVal Target As Range)
+    ' this filter will get triggered when there is a change in the worksheet
+    Dim filterValue As Variant
+    Dim rng As Range
+    Dim i As Integer
+
+    ' Define the range that contains the filter values
+    Set rng = Range("B3:J3")
+
+    With Sheet1
+        .AutoFilterMode = False
+        With .Range("A4:L4")
+            .AutoFilter
+            For i = 1 To rng.Columns.Count
+                filterValue = rng.Cells(1, i).Value
+                If Len(filterValue) <> 0 Then
+                    If IsNumeric(filterValue) Then
+                        ' Apply numeric filter with >= and <= criteria
+                        .AutoFilter Field:=i + 1, Criteria1:=">=" & CDbl(filterValue), Operator:=xlAnd, Criteria2:="<=" & CDbl(filterValue)
+                    ElseIf IsDate(filterValue) Then
+                        ' Apply date filter with >= and <= criteria
+                        Dim filterDate As String
+                        filterDate = Format(CDate(filterValue), "yyyy-mm-dd")
+                        .AutoFilter Field:=i + 1, Criteria1:=">=" & filterDate, Operator:=xlAnd, Criteria2:="<=" & filterDate
+                    Else
+                        ' Apply text filter
+                        .AutoFilter Field:=i + 1, Criteria1:="*" & filterValue & "*"
+                    End If
+                End If
+            Next i
+        End With
+    End With
+End Sub
+
+
+Sub Clear_AllFilters()
+    Range("B3:J3").ClearContents
+    Range("B3").Select
+End Sub
